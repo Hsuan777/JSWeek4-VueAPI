@@ -1,0 +1,11 @@
+@mixin hidden-text($width, $height, $bg_url) {
+  width: $width;
+  height: $height;
+  text-indent: 101%;
+  overflow: hidden;
+  white-space: nowrap;
+  background-image: $bg_url;
+  background-repeat: no-repeat;
+}
+
+
