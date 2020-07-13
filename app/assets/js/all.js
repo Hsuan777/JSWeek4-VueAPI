@@ -9,8 +9,8 @@ let app = new Vue({
       description: "test",
       imageUrl: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1351&q=80"],
       enabled: true,
-      origin_price: 0,
-      price: 0,
+      origin_price: ``,
+      price: ``,
       unit: "單位"
     },
     hexAPI: {
@@ -44,14 +44,22 @@ let app = new Vue({
           // someCookieName可自定義，true改成 傳送回來的 token
           // 到期日則是用 new Data()的方式
           document.cookie = `hexToken=${vm.token}; expires=${new Date(expired * 1000)}; path=/`;
-          console.log("登入成功!")
+          vm.user.email =``;
+          vm.user.password =``;
+          // 跳轉頁面
+          window.location = "products.html";
+         
         })
         .catch((error) => {
           console.log(error);
         })
     },
-    signout() {
+    signout(e) {
+      e.preventDefault();
+      // 將存放在瀏覽器的 cookie清空
       document.cookie = `hexToken=; expires=; path=/`;
+      this.hexAPI.data =[];
+      window.location = "index.html";
     },
     /* 取得遠端 API資料 */
     getData() {
@@ -61,14 +69,10 @@ let app = new Vue({
       const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
       // axios的驗證指令，Bearer是後端用的
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-
       axios
-        // /ec/products是給前端資料
-        // .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/ec/products`)
-        .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/products`)
+        .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/products`) // 取得所有 products
         .then((res) => {
           vm.hexAPI.data = res.data.data;
-
         });
     },
     /* 新增資料 */
@@ -83,25 +87,25 @@ let app = new Vue({
         });
     },
     /* 新建資料 */
+    // 將 this.product的屬性值複製到暫存
     initData() {
       this.temporary = Object.assign({}, this.product);
     },
-
     /* 複製資料 */
+    // 將 v-for所取出的 item放入暫存
     copyData(item) {
-      let vm = this;
-      vm.temporary = Object.assign({}, item);
+      this.temporary = Object.assign({}, item);
     },
     /* 修改與更新資料 */
     updateData() {
       let vm = this;
-
+      // if判斷，若有值則為 true
       if (vm.temporary.id) {
         vm.hexAPI.data.forEach((item) => {
           if (vm.temporary.id === item.id) {
             const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
             axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-            // patch跟 post一樣需要兩個參數 patch(`API網址`, 單一物件資料)
+            // patch跟 post一樣需要兩個參數 patch(`API網址`, 單一物件資料)，否則不會變更
             axios
               .patch(`${this.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/product/${vm.temporary.id}`, vm.temporary)
               .then(() => {
@@ -131,24 +135,17 @@ let app = new Vue({
         }
       })
     },
-    isUpFn(isUp) {
-      if (isUp) {
-        return `已開放`;
-      } else {
-        return `未開放`;
-      }
-    },
     // 工具類 //
     cleanDate() {
       this.temporary = {};
     },
   },
-  // 渲染畫面前
+  // 資料建立之後，適合處理資料
   created() {
-    this.getData();
-  },
-  // 渲染畫面後
-  mounted() {
     // this.getData();
+  },
+  // 元件渲染 html後，適合處理 DOM
+  mounted() {
+    this.getData();
   }
 })

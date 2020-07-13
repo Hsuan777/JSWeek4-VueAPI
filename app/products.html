@@ -1,0 +1,214 @@
+---
+title: product
+layout: ./app/layout.ejs
+engine: ejs
+current: product
+---
+<main id="app">
+  <nav class="navbar navbar-expand-lg navbar-light bg-white">
+    <a class="navbar-brand text-primary" href="index.html">HexHotal</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+  
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="products.html">房間管理</a>
+        </li>
+        
+        <li class="nav-item">
+          <!-- EJS 無法被 Vue找到綁定的事件，但是 modal事件卻可以 -->
+          <a class="nav-link" type="button" data-toggle="modal" data-target="#signoutModal">
+            Signout
+          </a>
+        </li>
+      </ul>
+    </div>  
+  </nav>
+
+  <!-- 表格形式 -->
+  <section class="container">
+    <h2 class="mt-2 font-weight-bold d-flex justify-content-between">
+      房間列表 (後臺管理)
+    </h2>
+    <div class="d-flex justify-content-end mb-2">
+      <button type="button" class="btn btn-primary btn-lg px-3" data-toggle="modal" data-target="#addProductModal"
+        @click="initData">新增房間</button>
+    </div>
+    <div class="table-responsive">
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="row" class="text-nowrap">房間分類</th>
+            <th scope="row" width="300px">房間名稱</th>
+            <th scope="row">額外服務</th>
+            <th scope="row" width="150px" class="text-right text-nowrap">原價</th>
+            <th scope="row" width="150px" class="text-right text-nowrap">售價</th>
+            <th scope="row" width="150px" class="text-center text-nowrap">是否開放</th>
+            <th scope="row" class="text-nowrap">編輯</th>
+          </tr>
+        </thead>
+        <tbody class="p-0">
+          <tr v-for="(item, key) in hexAPI.data" :key="item.id">
+            <td class="align-middle">{{item.category}}</td>
+            <td class="align-middle">{{item.title}}</td>
+            <td class="align-middle">
+              <span v-for="(item, index) in item.services" :key="index">。{{item}} </span>
+            </td>
+            <td class="text-right align-middle">{{item.origin_price}}</td>
+            <td class="text-right align-middle">{{item.price}}</td>
+            <!-- <td class="text-center align-middle" >{{ isUpFn(item.enabled) }}</td> -->
+            <td class="text-center align-middle">
+              <span v-if="item.enabled" class="text-success">已開放</span>
+              <span v-else class="text-danger">未開放</span>
+            </td>
+            <td class="pr-0">
+              <button class="btn btn-warning" @click="copyData(item)" data-toggle="modal"
+                data-target="#addProductModal">修改</button>
+              <button class="btn btn-danger mr-0" @click="copyData(item)" data-toggle="modal"
+                data-target="#deleteProductModal">刪除</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- add/edit Modal -->
+    <div class="modal fade" id="addProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-dark">
+            <h5 class="modal-title text-white font-weight-bold">新增房間</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="#">
+              <div class="form-row">
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="" class="">房間圖片</label>
+                    <input type="text" placeholder="請輸入圖片網址" class="form-control" v-model="temporary.imageUrl">
+                  </div>
+                  <img :src="temporary.imageUrl" alt="" class="img-fluid">
+                </div>
+                <div class="col-6">
+                  <div class="form-group">
+                    <label for="" class="">房間名稱</label>
+                    <input type="text" placeholder="產品名稱" class="form-control" v-model="temporary.title">
+                  </div>
+                  <div class="form-row justify-content-between">
+                    <div class="col-6">
+                      <div class="form-group">
+                        <label for="" class="">房間分類</label>
+                        <input type="text" placeholder="分類名稱" class="form-control" v-model="temporary.category">
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="form-group">
+                        <label for="" class="">單位</label>
+                        <input type="text" placeholder="間" class="form-control" v-model="temporary.unit">
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="form-group">
+                        <label for="" class="">原價</label>
+                        <input type="number" placeholder="" class="form-control" v-model="temporary.origin_price">
+                      </div>
+                    </div>
+
+                    <div class="col-6">
+                      <div class="form-group">
+                        <label for="" class="">售價</label>
+                        <input type="number" placeholder="" class="form-control" v-model="temporary.price">
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="" class="">房間描述</label>
+                    <textarea type="text" placeholder="" class="form-control"
+                      v-model="temporary.description"></textarea>
+                  </div>
+                  <div class="form-group">
+                    <label for="" class="">房間內容</label>
+                    <textarea type="text" placeholder="" class="form-control" v-model="temporary.content"></textarea>
+                  </div>
+                  <div class="form-check">
+                    <input type="checkbox" id="isUp" class="form-check-input" v-model="temporary.enabled">
+                    <label for="isUp" class="form-check-label">是否開放</label>
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" @click="updateData" data-dismiss="modal">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- delete Modal -->
+    <div class="modal fade" id="deleteProductModal" tabindex="-1" role="dialog" aria-labelledby="addProductModalLabel"
+      aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-danger">
+            <h5 class="modal-title text-white font-weight-bold">刪除房間</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <h3>是否刪除 <span class="text-danger"> {{ temporary.title }}</span> ? 刪除後將無法復原 !</h3>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="deleteData" data-dismiss="modal">Delete</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- signout Modal -->
+    <div class="modal fade" id="signoutModal" tabindex="-1" role="dialog" aria-labelledby="loginModal" aria-hidden="true">
+      <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+          <div class="modal-header bg-primary">
+            <h5 class="modal-title text-white font-weight-bold">是否登出 ?</h5>
+            <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form action="">
+              <!-- <div class="form-group">
+                <label for="inputEmail" class="font-weight-bold">Email address</label>
+                <input type="email" id="inputEmail" class="form-control" placeholder="Email address"
+                  v-model="user.email" required>
+              </div>
+              <div class="form-group">
+                <label for="inputPassword" class="font-weight-bold">Password</label>
+                <input type="password" name="" id="inputPassword" class="form-control" placeholder="Password"
+                  v-model="user.password" required>
+              </div> -->
+              <div class="d-flex justify-content-around">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" @click="signout" data-dismiss="modal">登出</button>
+              </div>
+            </form>
+          </div>
+          <!-- <div class="modal-footer">
+            <button type="button" class="btn btn-primary" @click="deleteData" data-dismiss="modal">Delete</button>
+           
+          </div> -->
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
