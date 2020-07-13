@@ -22,6 +22,7 @@ let app = new Vue({
       email: ``,
       password: ``,
     },
+    pagination:{},
     temporary: [],
   },
   methods: {
@@ -60,7 +61,7 @@ let app = new Vue({
       window.location = "index.html";
     },
     /* 取得遠端 API資料 */
-    getData() {
+    getData(page = 1) {
       let vm = this;
       // 取得 cookie的 token資料
       // 範例中的 test2替換成自訂義的名稱，也就是在 login(){}裡，document.cookie的自取名稱 hexToken
@@ -68,10 +69,12 @@ let app = new Vue({
       // axios的驗證指令，Bearer是後端用的
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       axios
-        .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/products`) // 取得所有 products
+        .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/products?page=${page}`) // 取得所有 products
         .then((res) => {
+          // 取得所有產品資料
           vm.hexAPI.data = res.data.data;
           // 取得分頁資訊
+          vm.pagination = res.data.meta.pagination;
           console.log(res.data.meta.pagination);
         });
     },
@@ -160,7 +163,11 @@ Vue.component(`pagination`, {
           <span aria-hidden="true">&laquo;</span>
         </a>
       </li>
-      <li class="page-item"><a class="page-link" href="#">{{ pages }}</a></li>
+      <li class="page-item" v-for="(item, index) in pages.total_pages" :key="index">
+        <a class="page-link" href="#">
+          {{ item }}
+        </a>
+      </li>
       
       <li class="page-item">
         <a class="page-link" href="#" aria-label="Next">
@@ -179,4 +186,9 @@ Vue.component(`pagination`, {
   // 定義樣板屬性，用陣列方式定義，接著在網頁中寫 pages=某值或其他函式，資料就會寫入樣板中
   // 但是範例為什麼是用物件?
   props: [`pages`],
+  methods:{
+    emitPages(item){
+      this.$emit(`emit-pages`, item);
+    },
+  },
 })
