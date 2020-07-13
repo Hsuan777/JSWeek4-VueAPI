@@ -1,4 +1,3 @@
-
 let app = new Vue({
   el: `#app`,
   data: {
@@ -9,8 +8,8 @@ let app = new Vue({
       description: "test",
       imageUrl: ["https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=1351&q=80"],
       enabled: true,
-      origin_price: ``,
-      price: ``,
+      origin_price: `2000`,
+      price: `1000`,
       unit: "單位"
     },
     hexAPI: {
@@ -35,7 +34,6 @@ let app = new Vue({
       axios
         .post(`${this.hexAPI.apiPath}auth/login`, this.user)
         .then((res) => {
-          console.log(res);
           // 1. 送出驗證資訊後，驗證完畢取得 token以及到期日(expired)
           vm.token = res.data.token;
           const expired = res.data.expired;
@@ -44,11 +42,11 @@ let app = new Vue({
           // someCookieName可自定義，true改成 傳送回來的 token
           // 到期日則是用 new Data()的方式
           document.cookie = `hexToken=${vm.token}; expires=${new Date(expired * 1000)}; path=/`;
-          vm.user.email =``;
-          vm.user.password =``;
+          vm.user.email = ``;
+          vm.user.password = ``;
           // 跳轉頁面
           window.location = "products.html";
-         
+
         })
         .catch((error) => {
           console.log(error);
@@ -58,7 +56,7 @@ let app = new Vue({
       e.preventDefault();
       // 將存放在瀏覽器的 cookie清空
       document.cookie = `hexToken=; expires=; path=/`;
-      this.hexAPI.data =[];
+      this.hexAPI.data = [];
       window.location = "index.html";
     },
     /* 取得遠端 API資料 */
@@ -73,6 +71,8 @@ let app = new Vue({
         .get(`${vm.hexAPI.apiPath}${vm.hexAPI.personID}/admin/ec/products`) // 取得所有 products
         .then((res) => {
           vm.hexAPI.data = res.data.data;
+          // 取得分頁資訊
+          console.log(res.data.meta.pagination);
         });
     },
     /* 新增資料 */
@@ -148,4 +148,35 @@ let app = new Vue({
   mounted() {
     this.getData();
   }
+})
+// Vue.component(`網頁標籤元件名稱`, {})
+Vue.component(`pagination`, {
+  // 建立樣板
+  template: `
+  <nav aria-label="Page navigation example">
+    <ul class="pagination mx-auto">
+      <li class="page-item">
+        <a class="page-link" href="#" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+      <li class="page-item"><a class="page-link" href="#">{{ pages }}</a></li>
+      
+      <li class="page-item">
+        <a class="page-link" href="#" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>`,
+  // 定義資料，元件的 data必須使用 return的方式回傳資料，與 new Vue的 data不同
+  data() {
+    return {
+      // 此元件只會讀取該元件的 data資料
+      // icon:`left`,
+    };
+  },
+  // 定義樣板屬性，用陣列方式定義，接著在網頁中寫 pages=某值或其他函式，資料就會寫入樣板中
+  // 但是範例為什麼是用物件?
+  props: [`pages`],
 })
