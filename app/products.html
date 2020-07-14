@@ -75,8 +75,14 @@ current: product
     </div>
 
     <div class="d-flex justify-content-center ">
-      <!-- <pagination pages="2"></pagination> -->
-      <pagination :pages="pagination"></pagination>
+      <!-- <pagination> -> 元件自定義名稱 -->
+      <!-- pages -> props，元件自定義屬性 -->
+      <!-- v-bind:pages -> 帶入 Vue data裡的 pagination -->
+      <!-- @emit-pages -> 自訂元件中，methods其中一個事件或函式，
+        元件樣板內可以有大小寫，但網頁中的要加上 - 符號 -->
+      <!-- getData -> Vue methods裡的其中一個函式 -->
+      <!-- @emit-pages getData -->
+      <pagination :pages="pagination" @emit-pages="getData"></pagination>
     </div>
 
     <!-- add/edit Modal -->
