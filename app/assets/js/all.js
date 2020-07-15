@@ -27,7 +27,6 @@ Vue.component(`pagination`, {
   data() {
     return {
       // 此元件只會讀取該元件的 data資料
-      // icon:`left`,
     };
   },
   // 定義樣板屬性，用陣列方式定義，接著在網頁中寫 pages=某值或其他函式，資料就會寫入樣板中
@@ -195,6 +194,7 @@ let app = new Vue({
   },
   // 資料建立之後，適合處理資料
   created() {
+
   },
   // 元件渲染 html後，適合處理 DOM
   mounted() {
