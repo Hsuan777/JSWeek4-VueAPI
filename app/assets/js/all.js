@@ -65,7 +65,7 @@ let app = new Vue({
       personID: `85a8cd22-1b7d-43af-9b5a-5aa679129559`,
       apiPath: `https://course-ec-api.hexschool.io/api/`,
       data: [],
-      token: ``
+      token: ``,
     },
     user: {
       email: ``,
@@ -194,11 +194,16 @@ let app = new Vue({
   },
   // 資料建立之後，適合處理資料
   created() {
-
+    // TODO:修正重複迴圈
+    // const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+    // if( token === ``){
+    //   window.location = "index.html";
+    // }
+    this.getData();
   },
   // 元件渲染 html後，適合處理 DOM
   mounted() {
-    this.getData();
+    
   }
 })
 
