@@ -65,7 +65,6 @@ let app = new Vue({
       personID: `85a8cd22-1b7d-43af-9b5a-5aa679129559`,
       apiPath: `https://course-ec-api.hexschool.io/api/`,
       data: [],
-      token: ``,
     },
     user: {
       email: ``,
@@ -83,13 +82,14 @@ let app = new Vue({
         .post(`${this.hexAPI.apiPath}auth/login`, this.user)
         .then((res) => {
           // 1. 送出驗證資訊後，驗證完畢取得 token以及到期日(expired)
-          vm.token = res.data.token;
+          const token = res.data.token;
           const expired = res.data.expired;
           // 2. 取得上述的值後，就把它們存在 cookie，以便使用者在期限內再次登入
           // 參考 document.cookie MDN
           // someCookieName可自定義，true改成 傳送回來的 token
           // 到期日則是用 new Data()的方式
-          document.cookie = `hexToken=${vm.token}; expires=${new Date(expired * 1000)}; path=/`;
+          document.cookie = `hexToken=${token}; expires=${new Date(expired * 1000)}; path=/`;
+          //清空
           vm.user.email = ``;
           vm.user.password = ``;
           // 跳轉頁面
@@ -105,16 +105,16 @@ let app = new Vue({
       // 將存放在瀏覽器的 cookie清空
       document.cookie = `hexToken=; expires=; path=/`;
       this.hexAPI.data = [];
+      this.hexAPI.token = ``,
+      this.hexAPI.tokenName = ``,
       window.location = "index.html";
     },
     /* 取得遠端 API資料 */
     // 預設為 1
     getData(page = 1) {
       let vm = this;
-      // 取得 cookie的 token資料
-      // 範例中的 test2替換成自訂義的名稱，也就是在 login(){}裡，document.cookie的自取名稱 hexToken
-      const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
       // axios的驗證指令，Bearer是後端用的
+      const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
       axios.defaults.headers.common.Authorization = `Bearer ${token}`;
       axios
         // 原本是 products ->最終結果是取得所有資料
@@ -194,11 +194,11 @@ let app = new Vue({
   },
   // 資料建立之後，適合處理資料
   created() {
-    // TODO:修正重複迴圈
-    // const token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
-    // if( token === ``){
-    //   window.location = "index.html";
-    // }
+    // 要執行的命令都寫在同一檔案，會造成一起執行
+    // 必須拆分檔案
+    if( this.hexAPI.tokenName === ``){
+      window.location = "index.html";
+    }
     this.getData();
   },
   // 元件渲染 html後，適合處理 DOM
