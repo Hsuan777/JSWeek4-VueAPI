@@ -33,7 +33,6 @@
             <input type="password" name="" id="inputPassword" class="form-control" placeholder="Password" v-model="user.password" required>
           </div>
           <div class="d-flex justify-content-around">
-            <button type="button" class="btn btn-secondary mb-2" @click="signout">登出</button>
             <button type="submit" class="btn btn-primary mb-2" @click="login">登入</button>
           </div>
         </form>
@@ -64,9 +63,9 @@
   <!-- vue -->
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.9/dist/vue.js"></script>
 
-  <script  src="assets/js/all.js"></script>
+  <!-- <script  src="assets/js/all.js"></script> -->
   <script type="module">
-    import fn from '/assets/js/test.js';
+    import * as all from '/assets/js/login.js';
   </script>
 
  

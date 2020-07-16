@@ -46,42 +46,17 @@ var app = new Vue({
       apiPath: "https://course-ec-api.hexschool.io/api/",
       data: []
     },
-    user: {
-      email: "",
-      password: ""
-    },
     pagination: {},
     temporary: []
   },
   methods: {
     // 功能類 //
-    login: function login(e) {
-      var vm = this;
-      e.preventDefault();
-      axios.post("".concat(this.hexAPI.apiPath, "auth/login"), this.user).then(function (res) {
-        // 1. 送出驗證資訊後，驗證完畢取得 token以及到期日(expired)
-        var token = res.data.token;
-        var expired = res.data.expired; // 2. 取得上述的值後，就把它們存在 cookie，以便使用者在期限內再次登入
-        // 參考 document.cookie MDN
-        // someCookieName可自定義，true改成 傳送回來的 token
-        // 到期日則是用 new Data()的方式
-
-        document.cookie = "hexToken=".concat(token, "; expires=").concat(new Date(expired * 1000), "; path=/"); //清空
-
-        vm.user.email = "";
-        vm.user.password = ""; // 跳轉頁面
-
-        window.location = "products.html";
-      })["catch"](function (error) {
-        console.log(error);
-      });
-    },
     signout: function signout(e) {
       e.preventDefault(); // 將存放在瀏覽器的 cookie清空
 
       document.cookie = "hexToken=; expires=; path=/";
       this.hexAPI.data = [];
-      this.hexAPI.token = "", this.hexAPI.tokenName = "", window.location = "index.html";
+      this.hexAPI.token = "", window.location = "index.html";
     },
 
     /* 取得遠端 API資料 */
@@ -172,9 +147,10 @@ var app = new Vue({
   },
   // 資料建立之後，適合處理資料
   created: function created() {
-    // 要執行的命令都寫在同一檔案，會造成一起執行
-    // 必須拆分檔案
-    if (this.hexAPI.tokenName === "") {
+    // 取出 token 名稱，若為空值則跳回 login.html，防止直接進 products.html
+    var token = document.cookie.replace(/(?:(?:^|.*;\s*)hexToken\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+
+    if (token === "") {
       window.location = "index.html";
     }
 
@@ -183,16 +159,4 @@ var app = new Vue({
   // 元件渲染 html後，適合處理 DOM
   mounted: function mounted() {}
 });
-"use strict";
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-exports.fn = void 0;
-
-var fn = function fn() {
-  console.log("c8c8 c8 ");
-};
-
-exports.fn = fn;
-//# sourceMappingURL=all.js.map
+//# sourceMappingURL=products.js.map
